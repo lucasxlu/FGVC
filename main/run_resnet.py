@@ -67,12 +67,12 @@ def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, 
         print('Saving trained model...')
         model_path_dir = './model'
         mkdirs_if_not_exist(model_path_dir)
-        torch.save(model.state_dict(), os.path.join(model_path_dir, 'resnet18.pth'))
+        torch.save(model.state_dict(), os.path.join(model_path_dir, 'resnet.pth'))
         print('ResNet has been saved successfully~')
 
     else:
         print('Loading pre-trained model...')
-        model.load_state_dict(torch.load(os.path.join('./model/resnet18.pth')))
+        model.load_state_dict(torch.load(os.path.join('./model/resnet.pth')))
 
     model.eval()
 
@@ -92,7 +92,7 @@ def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, 
 
             correct += (predicted == label).sum().item()
 
-    print('Accuracy of ResNet18: %f' % (correct / total))
+    print('Accuracy of ResNet: %f' % (correct / total))
 
 
 def run_resnet(train_dataloader, test_dataloader):
@@ -102,7 +102,7 @@ def run_resnet(train_dataloader, test_dataloader):
     :param test_dataloader:
     :return:
     """
-    resnet = models.resnet18(pretrained=True)
+    resnet = models.resnet50(pretrained=True)
     num_ftrs = resnet.fc.in_features
     resnet.fc = nn.Linear(num_ftrs, 998)
 
