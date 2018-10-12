@@ -29,12 +29,14 @@ def get_access_token():
 
 
 def rec_with_baidu_ai(img_file, access_token):
+    """
+    Plant Recognition with Baidu AI
+    :param img_file:
+    :param access_token:
+    :return:
+    """
     import base64
     import requests
-
-    '''
-    植物识别
-    '''
 
     request_url = "https://aip.baidubce.com/rest/2.0/image-classify/v1/plant"
 
@@ -55,6 +57,7 @@ def rec_with_baidu_ai(img_file, access_token):
 if __name__ == '__main__':
     access_token = get_access_token()
 
-    img_dir = "G:\Dataset\CV\FGCV5/train\category_146"
+    # img_dir = "G:\Dataset\CV\FGCV5/train\category_146"
+    img_dir = "C:\DataSet\FGVC/train\category_180"
     for _ in os.listdir(img_dir):
         print(rec_with_baidu_ai(os.path.join(img_dir, _), access_token))
