@@ -56,7 +56,7 @@ def rec_with_baidu_ai(img_file, access_token):
 if __name__ == '__main__':
     access_token = get_access_token()
 
-    img_dir = "G:\Dataset\CV\FGCV5/train\category_526"
+    img_dir = "G:\Dataset\CV\FGCV5/train\category_556"
     # img_dir = "C:\DataSet\FGVC/train\category_227"
     for _ in os.listdir(img_dir):
         print(rec_with_baidu_ai(os.path.join(img_dir, _), access_token))
