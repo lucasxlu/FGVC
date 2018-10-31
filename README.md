@@ -7,7 +7,7 @@
 
 ## Results
 
-| Model | Accuracy |
+| Model | Top-1 Accuracy |
 | :---: | :---: |
 | ResNet50 | 89.0947% |
 | ResNet18 | 84.5452% |
