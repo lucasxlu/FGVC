@@ -40,7 +40,8 @@ class PlantsDiseaseDataset(Dataset):
         if train_val == 'train':
             with open(train_json, mode='rt') as f:
                 for _ in json.load(f):
-                    imgs.append(_['image_id'])
+                    imgs.append(
+                        os.path.join(cfg['image_dir'], 'AgriculturalDisease_trainingset', 'images', _['image_id']))
                     lbs.append(_['disease_class'])
 
             self.img_files = imgs
@@ -48,7 +49,7 @@ class PlantsDiseaseDataset(Dataset):
         elif train_val == 'val':
             with open(val_json, mode='rt') as f:
                 for _ in json.load(f):
-                    imgs.append(_['image_id'])
+                    imgs.append(os.path.join(cfg['image_dir'], 'AgriculturalDisease_testA', 'images', _['image_id']))
                     lbs.append(_['disease_class'])
 
             self.img_files = imgs
@@ -63,7 +64,7 @@ class PlantsDiseaseDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        image = io.imread(os.path.join(cfg['image_dir'], 'AgriculturalDisease_testA', 'images', self.img_files[idx]))
+        image = io.imread(self.img_files[idx])
         label = self.labels[idx]
 
         sample = {'image': image, 'label': label, 'filename': self.img_files[idx]}
