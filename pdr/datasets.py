@@ -2,22 +2,17 @@
 definition of datasets
 Author: XuLu
 """
+import json
 import os
 import sys
-import json
 
 import numpy as np
 from PIL import Image
-from PIL import ImageFile
 from skimage import io
 from torch.utils.data import Dataset
-from sklearn.model_selection import train_test_split
-import shutil
 
 sys.path.append('../')
 from pdr.cfg import cfg
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class PlantsDiseaseDataset(Dataset):
@@ -38,19 +33,24 @@ class PlantsDiseaseDataset(Dataset):
         lbs = []
 
         if train_val == 'train':
-            with open(train_json, mode='rt') as f:
+            with open(train_json, mode='rt', encoding='utf-8') as f:
                 for _ in json.load(f):
-                    imgs.append(
-                        os.path.join(cfg['image_dir'], 'AgriculturalDisease_trainingset', 'images', _['image_id']))
-                    lbs.append(_['disease_class'])
+                    img_fp = os.path.join(cfg['image_dir'], 'AgriculturalDisease_trainingset', 'images',
+                                          _['image_id']).encode('ascii', 'ignore').decode('utf-8')
+                    if os.path.exists(img_fp):
+                        imgs.append(img_fp)
+                        lbs.append(_['disease_class'])
 
             self.img_files = imgs
             self.labels = lbs
         elif train_val == 'val':
-            with open(val_json, mode='rt') as f:
+            with open(val_json, mode='rt', encoding='utf-8') as f:
                 for _ in json.load(f):
-                    imgs.append(os.path.join(cfg['image_dir'], 'AgriculturalDisease_testA', 'images', _['image_id']))
-                    lbs.append(_['disease_class'])
+                    img_fp = os.path.join(cfg['image_dir'], 'AgriculturalDisease_testA', 'images',
+                                          _['image_id']).encode('ascii', 'ignore').decode('utf-8')
+                    if os.path.exists(img_fp):
+                        imgs.append(img_fp)
+                        lbs.append(_['disease_class'])
 
             self.img_files = imgs
             self.labels = lbs
@@ -64,7 +64,9 @@ class PlantsDiseaseDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        image = io.imread(self.img_files[idx])
+        img_path = self.img_files[idx]
+
+        image = io.imread(img_path)
         label = self.labels[idx]
 
         sample = {'image': image, 'label': label, 'filename': self.img_files[idx]}
@@ -77,7 +79,6 @@ class PlantsDiseaseDataset(Dataset):
 
 class PlantsDiseaseInferenceDataset(Dataset):
     """
-    UNFINISHED YET!!
     Plants Disease Inference dataset
     """
 
@@ -87,27 +88,22 @@ class PlantsDiseaseInferenceDataset(Dataset):
         :param transform:
         """
         inference_base = '/var/log/PDR'
-        dir_names = []
         img_files = []
-        labels = []
-        for i, dir_name in enumerate(dir_names):
+        for i, dir_name in enumerate(inference_base):
             for _ in os.listdir(os.path.join(inference_base, dir_name)):
                 img_files.append(os.path.join(inference_base, dir_name, _))
-                labels.append(i)
 
         self.img_files = img_files
-        self.labels = labels
         self.transform = transform
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.img_files)
 
     def __getitem__(self, idx):
         print(self.img_files[idx])
 
         image = io.imread(self.img_files[idx])
-        label = self.labels[idx]
-        sample = {'image': image, 'label': label, 'class': round(label) - 1, 'filename': self.img_files[idx]}
+        sample = {'image': image, 'filename': self.img_files[idx]}
 
         if self.transform:
             sample['image'] = self.transform(Image.fromarray(sample['image'].astype(np.uint8)))

@@ -1,69 +1,94 @@
-import numpy as np
+# Model Inference
+from pprint import pprint
 
+import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from PIL import Image
 from skimage import io
-from skimage.transform import resize
 from torchvision import models
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-
-def load_model(resnet_model='./model/resnet18.pth'):
+class PlantRecognizer():
     """
-    load pretrained model
-    :param resnet_model:
-    :return:
-    """
-    resnet = models.resnet18(pretrained=False)
-    num_ftrs = resnet.fc.in_features
-    resnet.fc = nn.Linear(num_ftrs, 998)
-    print("loading pre-trained model...")
-    if torch.cuda.device_count() > 1:
-        print("We are running on", torch.cuda.device_count(), "GPUs!")
-        resnet = nn.DataParallel(resnet)
-        resnet.load_state_dict(torch.load(resnet_model))
-    else:
-        state_dict = torch.load(resnet_model)
-        from collections import OrderedDict
-        new_state_dict = OrderedDict()
-        for k, v in state_dict.items():
-            name = k[7:]  # remove `module.`
-            new_state_dict[name] = v
-        # load params
-        resnet.load_state_dict(new_state_dict)
-
-    resnet.eval()
-    resnet = resnet.to(device)
-
-    return resnet
-
-
-def predict(model, img_file):
-    """
-    predict with pretrained ResNet18
-    :param model:
-    :param img_file:
-    :return:
+    Plant Recognition Class Wrapper
     """
 
-    img = resize(io.imread(img_file), (224, 224), mode='constant')
+    def __init__(self, pretrained_model_path):
+        model = models.resnet50(pretrained=False)
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, 998)
 
-    img[0] -= 131.45376586914062
-    img[1] -= 103.98748016357422
-    img[2] -= 91.46234893798828
+        model = model.float()
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    img = np.transpose(img, [2, 0, 1])
+        model = nn.DataParallel(model)
+        model.load_state_dict(torch.load(pretrained_model_path))
 
-    img = torch.from_numpy(img).unsqueeze(0).float()
-    img = img.to(device)
+        # if torch.cuda.device_count() > 1:
+        #     print("We are running on", torch.cuda.device_count(), "GPUs!")
+        #     model = nn.DataParallel(model)
+        #     model.load_state_dict(torch.load(pretrained_model_path))
+        # else:
+        #     state_dict = torch.load(pretrained_model_path)
+        #     from collections import OrderedDict
+        #     new_state_dict = OrderedDict()
+        #     for k, v in state_dict.items():
+        #         name = k[7:]  # remove `module.`
+        #         new_state_dict[name] = v
+        #         model.load_state_dict(new_state_dict)
 
-    pred = model.forward(img)
-    _, predicted = torch.max(pred.data, 1)
+        model.to(device)
+        model.eval()
 
-    print(int(predicted.cpu()))
+        df = pd.read_csv('../label.csv')
+        key_type = {}
+        for i in range(len(df['category_name'].tolist())):
+            key_type[int(df['category_name'].tolist()[i].split('_')[-1])] = df['label'].tolist()[i]
+
+        self.device = device
+        self.model = model
+        self.key_type = key_type
+
+    def infer(self, img_file):
+        img = io.imread(img_file)
+        img = Image.fromarray(img.astype(np.uint8))
+
+        preprocess = transforms.Compose([
+            transforms.Resize(227),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+
+        img = preprocess(img)
+        img.unsqueeze_(0)
+
+        img = img.to(self.device)
+
+        outputs = self.model.forward(img)
+        outputs = F.softmax(outputs, dim=1)
+        # get TOP-K output labels and corresponding probabilities
+        topK_prob, topK_label = torch.topk(outputs, 5)
+        prob = topK_prob.to("cpu").detach().numpy().tolist()
+
+        _, predicted = torch.max(outputs.data, 1)
+
+        return {
+            'status': 0,
+            'message': 'success',
+            'results': [
+                {
+                    'name': self.key_type[int(topK_label[0][i].to("cpu"))],
+                    'prob': round(prob[0][i], 4)
+                } for i in range(5)
+            ]
+        }
 
 
 if __name__ == '__main__':
-    resnet = load_model()
-    predict(resnet, 'syc.jpg')
+    plant_recognizer = PlantRecognizer('./model/ResNet50_Plant.pth')
+    pprint(plant_recognizer.infer('./test.jpg'))
