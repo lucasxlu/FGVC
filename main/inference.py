@@ -16,7 +16,7 @@ class PlantRecognizer():
     """
 
     def __init__(self, pretrained_model_path):
-        model = models.resnet50(pretrained=False)
+        model = models.resnet18(pretrained=False)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 998)
 
@@ -69,6 +69,7 @@ class PlantRecognizer():
 
         img = img.to(self.device)
 
+        self.model.eval()
         outputs = self.model(img)
         outputs = F.softmax(outputs, dim=1)
 
@@ -84,6 +85,7 @@ class PlantRecognizer():
             'results': [
                 {
                     'name': self.key_type[int(topK_label[0][i].to("cpu"))],
+                    'category id': int(topK_label[0][i].data.to("cpu").numpy()),
                     'prob': round(prob[0][i], 4)
                 } for i in range(self.topK)
             ]
@@ -91,5 +93,5 @@ class PlantRecognizer():
 
 
 if __name__ == '__main__':
-    plant_recognizer = PlantRecognizer('./model/ResNet50_Plant.pth')
-    pprint(plant_recognizer.infer('./test.jpg'))
+    plant_recognizer = PlantRecognizer('./model/ResNet18_Plant.pth')
+    pprint(plant_recognizer.infer('./test4.jpg'))
