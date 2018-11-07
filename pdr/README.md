@@ -6,7 +6,7 @@ This module holds the code for
 
 
 ## Solutions
-1. Directly train a ```60 category``` deep classifier powered by 
+1. Directly train a ```61 category``` deep classifier powered by 
 ```ResNet/ResNeXt```.
 2. Follow a ```coarse-to-fine``` manner. Namely, we split the original 
 categories into several coarse categories by ```plants species``` first. And 
@@ -113,5 +113,5 @@ then split by ```disease type```, and finally by ```disease extent```.
 ## Performance
 | Methods | Model | Stage | Accuracy |
 | :---: | :---: | :---: | :---: | 
-| 60 Classification | ResNet18 | val | - |
+| 61 Classification | ResNet18 | val | 0.87 |
 | Coarse-to-fine | ResNet18 | val | - |

@@ -338,9 +338,9 @@ def batch_inference(model, inferencedataloader):
 
 
 if __name__ == '__main__':
-    resnet = models.resnet18(pretrained=True)
+    resnet = models.resnet50(pretrained=True)
     num_ftrs = resnet.fc.in_features
-    resnet.fc = nn.Linear(num_ftrs, 60)
+    resnet.fc = nn.Linear(num_ftrs, 61)
 
     run_license_type_rec(model=resnet, epoch=200)
 
