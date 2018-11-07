@@ -89,9 +89,12 @@ class PlantsDiseaseInferenceDataset(Dataset):
         """
         inference_base = '/var/log/PDR'
         img_files = []
-        for i, dir_name in enumerate(inference_base):
-            for _ in os.listdir(os.path.join(inference_base, dir_name)):
-                img_files.append(os.path.join(inference_base, dir_name, _))
+        for img_f in os.listdir(os.path.join(inference_base, 'AgriculturalDisease_testA', 'images')):
+            img_fp = os.path.join(inference_base, 'AgriculturalDisease_testA', 'images', img_f).encode('ascii',
+                                                                                                       'ignore').decode(
+                'utf-8')
+            if os.path.exists(img_fp):
+                img_files.append(img_fp)
 
         self.img_files = img_files
         self.transform = transform
@@ -100,8 +103,6 @@ class PlantsDiseaseInferenceDataset(Dataset):
         return len(self.img_files)
 
     def __getitem__(self, idx):
-        print(self.img_files[idx])
-
         image = io.imread(self.img_files[idx])
         sample = {'image': image, 'filename': self.img_files[idx]}
 
