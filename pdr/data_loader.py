@@ -53,7 +53,6 @@ def load_plants_disease_dataset():
 
 def load_plants_disease_inference():
     """
-    UNFINISHED YET!!
     load plants disease inference dataset
     :return:
     """

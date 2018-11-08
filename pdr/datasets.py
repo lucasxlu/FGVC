@@ -46,7 +46,7 @@ class PlantsDiseaseDataset(Dataset):
         elif train_val == 'val':
             with open(val_json, mode='rt', encoding='utf-8') as f:
                 for _ in json.load(f):
-                    img_fp = os.path.join(cfg['image_dir'], 'AgriculturalDisease_testA', 'images',
+                    img_fp = os.path.join(cfg['image_dir'], 'AgriculturalDisease_validationset', 'images',
                                           _['image_id']).encode('ascii', 'ignore').decode('utf-8')
                     if os.path.exists(img_fp):
                         imgs.append(img_fp)

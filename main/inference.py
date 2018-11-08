@@ -16,7 +16,7 @@ class PlantRecognizer():
     """
 
     def __init__(self, pretrained_model_path):
-        model = models.resnet18(pretrained=False)
+        model = models.resnet18(pretrained=True)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 998)
 
@@ -53,8 +53,6 @@ class PlantRecognizer():
         self.topK = 5
 
     def infer(self, img_file):
-        # img = io.imread(img_file)
-        # img = Image.fromarray(img.astype(np.uint8))
         img = Image.open(img_file)
 
         preprocess = transforms.Compose([
@@ -69,7 +67,6 @@ class PlantRecognizer():
 
         img = img.to(self.device)
 
-        self.model.eval()
         outputs = self.model(img)
         outputs = F.softmax(outputs, dim=1)
 
@@ -94,4 +91,4 @@ class PlantRecognizer():
 
 if __name__ == '__main__':
     plant_recognizer = PlantRecognizer('./model/ResNet18_Plant.pth')
-    pprint(plant_recognizer.infer('./test4.jpg'))
+    pprint(plant_recognizer.infer('./xrk.jpg'))
