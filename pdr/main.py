@@ -301,15 +301,15 @@ def batch_inference(model, inferencedataloader):
     col = ['filename', 'pred', 'prob']
     df = pd.DataFrame([[filenames[i], y_pred[i], probs[i][0]] for i in range(len(filenames))],
                       columns=col)
-    df.to_csv("./output-%s.csv" % model.__class__.__name__, index=False)
+    df.to_csv("./submission.csv", index=False)
     print('CSV has been generated...')
 
 
 if __name__ == '__main__':
-    resnet = models.resnet50(pretrained=True)
+    resnet = models.resnet18(pretrained=True)
     num_ftrs = resnet.fc.in_features
     resnet.fc = nn.Linear(num_ftrs, 61)
 
-    run_license_type_rec(model=resnet, epoch=200)
+    # run_license_type_rec(model=resnet, epoch=200)
 
-    # batch_inference(resnet, data_loader.load_plants_disease_inference())
+    batch_inference(resnet, data_loader.load_plants_disease_inference())

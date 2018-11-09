@@ -1,6 +1,6 @@
 """
 definition of datasets
-Author: XuLu
+Author: LucasX
 """
 import json
 import os
@@ -90,6 +90,7 @@ class PlantsDiseaseInferenceDataset(Dataset):
         inference_base = '/var/log/PDR'
         img_files = []
         for img_f in os.listdir(os.path.join(inference_base, 'AgriculturalDisease_testA', 'images')):
+            # img_fp = os.path.join(inference_base, 'AgriculturalDisease_testA', 'images', img_f)
             img_fp = os.path.join(inference_base, 'AgriculturalDisease_testA', 'images', img_f).encode('ascii',
                                                                                                        'ignore').decode(
                 'utf-8')
