@@ -276,18 +276,14 @@ def batch_inference(model, inferencedataloader):
     model.load_state_dict(torch.load(os.path.join('./model/%s.pth' % model.__class__.__name__)))
     model.eval()
 
-    correct = 0
-    total = 0
     y_pred = []
-    y_true = []
     filenames = []
     probs = []
 
     with torch.no_grad():
         for data in inferencedataloader:
-            images, labels, filename = data['image'], data['label'], data['filename']
+            images, filename = data['image'], data['filename']
             images = images.to(device)
-            labels = labels.to(device)
 
             outputs = model(images)
 
@@ -297,41 +293,13 @@ def batch_inference(model, inferencedataloader):
             probs += topK_prob.to("cpu").detach().numpy().tolist()
 
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
 
             y_pred += predicted.to("cpu").detach().numpy().tolist()
-            y_true += labels.to("cpu").detach().numpy().tolist()
             filenames += filename
 
-    print('Accuracy of {0} on test set: {1}% '.format(model.__class__.__name__, 100 * correct / total))
-    print(
-        'Confusion Matrix of {0} on test set: '.format(model.__class__.__name__))
-
-    cm = confusion_matrix(y_true, y_pred)
-    print(cm)
-
-    cm = np.array(cm)
-
-    precisions = []
-    recalls = []
-    for i in range(len(cm)):
-        precisions.append(cm[i][i] / sum(cm[:, i].tolist()))
-        recalls.append(cm[i][i] / sum(cm[i, :].tolist()))
-
-    print('Precision List: ')
-    print(precisions)
-    print('Recall List: ')
-    print(recalls)
-
-    print("Precision of {0} on val set = {1}".format(model.__class__.__name__,
-                                                     sum(precisions) / len(precisions)))
-    print(
-        "Recall of {0} on val set = {1}".format(model.__class__.__name__, sum(recalls) / len(recalls)))
-
     print('Output CSV...')
-    col = ['filename', 'gt', 'pred', 'prob']
-    df = pd.DataFrame([[filenames[i], y_true[i], y_pred[i], probs[i][0]] for i in range(len(filenames))],
+    col = ['filename', 'pred', 'prob']
+    df = pd.DataFrame([[filenames[i], y_pred[i], probs[i][0]] for i in range(len(filenames))],
                       columns=col)
     df.to_csv("./output-%s.csv" % model.__class__.__name__, index=False)
     print('CSV has been generated...')
