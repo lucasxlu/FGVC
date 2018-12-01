@@ -19,9 +19,9 @@ class PlantsDataset(Dataset):
     Note: testset has no annotations, hence we just use training set to manually form our train/val/test dataset
     """
 
-    def __init__(self, type=True, transform=None):
+    def __init__(self, type='train', transform=None):
         train_json = os.path.join(cfg['config']['FGVC']['root'], 'FGVC', 'train.json')
-        test_json = os.path.join(cfg['config']['FGVC']['root'], 'FGVC', 'test.json')
+        # test_json = os.path.join(cfg['config']['FGVC']['root'], 'FGVC', 'test.json')
 
         images = []
         labels = []
@@ -35,7 +35,8 @@ class PlantsDataset(Dataset):
         train_images, test_images, train_labels, test_labels = train_test_split(images, labels, test_size=0.2,
                                                                                 random_state=42, stratify=labels)
 
-        train_images, val_images, train_labels, val_labels = train_test_split(train_images, train_labels, test_size=0.2,
+        train_images, val_images, train_labels, val_labels = train_test_split(train_images, train_labels,
+                                                                              test_size=0.05,
                                                                               random_state=2, stratify=train_labels)
 
         if type == 'train':

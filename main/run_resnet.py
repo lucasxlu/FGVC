@@ -140,7 +140,7 @@ def train_model_ft(model, dataloaders, criterion, optimizer, scheduler, num_epoc
                 running_corrects = 0
 
                 # Iterate over data.
-                for inputs, labels in dataloaders[phase]:
+                for inputs, labels, filenames in dataloaders[phase]:
                     inputs = inputs.to(device)
                     labels = labels.to(device)
 
@@ -225,7 +225,7 @@ def run_resnet(epoch, inference=False):
 
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=40, gamma=0.1)
 
-    train_model_ft(model=resnet, dataloaders=data_loader.load_data("FGVC"), criterion=criterion,
+    train_model_ft(model=resnet, dataloaders=load_data("FGVC"), criterion=criterion,
                    optimizer=optimizer, scheduler=exp_lr_scheduler, num_epochs=epoch, inference=inference)
 
     # train_model(model=resnet, train_dataloader=train_dataloader, test_dataloader=test_dataloader,
