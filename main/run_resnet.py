@@ -10,11 +10,12 @@ from torch.optim import lr_scheduler
 from torchvision import models
 
 sys.path.append('../')
+from data.data_loader import load_data
 from util.file_utils import mkdirs_if_not_exist
 from config.cfg import cfg
-from data import data_loader
 
-dataset_sizes = {x: len(data_loader[x]) for x in ['train', 'val', 'test']}
+dataloaders = load_data('FGVC')
+dataset_sizes = {x: len(dataloaders[x]) for x in ['train', 'val', 'test']}
 
 
 def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, scheduler, num_epochs,
