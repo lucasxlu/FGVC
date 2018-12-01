@@ -3,9 +3,13 @@ import os
 import sys
 import time
 
+import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
+from sklearn.metrics import confusion_matrix
 from torch.optim import lr_scheduler
 from torchvision import models
 
@@ -140,9 +144,9 @@ def train_model_ft(model, dataloaders, criterion, optimizer, scheduler, num_epoc
                 running_corrects = 0
 
                 # Iterate over data.
-                for inputs, labels, filenames in dataloaders[phase]:
-                    inputs = inputs.to(device)
-                    labels = labels.to(device)
+                for i, data in enumerate(dataloaders[phase], 0):
+                    inputs = data['image'].to(device)
+                    labels = data['label'].to(device)
 
                     # zero the parameter gradients
                     optimizer.zero_grad()
@@ -195,19 +199,61 @@ def train_model_ft(model, dataloaders, criterion, optimizer, scheduler, num_epoc
 
     correct = 0
     total = 0
+    y_pred = []
+    y_true = []
+    filename_list = []
+    probs = []
 
     with torch.no_grad():
         for data in dataloaders['test']:
-            images, label = data['image'], data['label']
+            images, labels, filenames = data['image'], data['label'], data['filename']
             images = images.to(device)
-            label = label.to(device)
+            labels = labels.to(device)
 
-            pred = model.forward(images)
-            _, predicted = torch.max(pred.data, 1)
-            total += pred.size(0)
-            correct += (predicted == label).sum().item()
+            outputs = model.forward(images)
+            outputs = F.softmax(outputs)
+
+            # get TOP-K output labels and corresponding probabilities
+            topK_prob, topK_label = torch.topk(outputs, 2)
+            probs += topK_prob.to("cpu").detach().numpy().tolist()
+
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+            y_pred += predicted.to("cpu").detach().numpy().tolist()
+            y_true += labels.to("cpu").detach().numpy().tolist()
+            filename_list += filenames
 
     print('Accuracy of ResNet: %f' % (correct / total))
+
+    cm = confusion_matrix(y_true, y_pred)
+    print(cm)
+
+    cm = np.array(cm)
+
+    precisions = []
+    recalls = []
+    for i in range(len(cm)):
+        precisions.append(cm[i][i] / sum(cm[:, i].tolist()))
+        recalls.append(cm[i][i] / sum(cm[i, :].tolist()))
+
+    print('Precision List: ')
+    print(precisions)
+    print('Recall List: ')
+    print(recalls)
+
+    print("Precision of {0} on val set = {1}".format(model.__class__.__name__,
+                                                     sum(precisions) / len(precisions)))
+    print(
+        "Recall of {0} on val set = {1}".format(model.__class__.__name__, sum(recalls) / len(recalls)))
+
+    print('Output CSV...')
+    col = ['filename', 'gt', 'pred', 'prob']
+    df = pd.DataFrame([[filenames[i], y_true[i], y_pred[i], probs[i][0]] for i in range(len(filenames))],
+                      columns=col)
+    df.to_csv("./output-%s.csv" % model.__class__.__name__, index=False)
+    print('CSV has been generated...')
 
 
 def run_resnet(epoch, inference=False):
