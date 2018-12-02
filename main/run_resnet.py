@@ -20,6 +20,7 @@ from config.cfg import cfg
 
 dataloaders = load_data('FGVC')
 dataset_sizes = {x: len(dataloaders[x]) for x in ['train', 'val', 'test']}
+batch_size = cfg['FGVC']['batch_size']
 
 
 def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, scheduler, num_epochs,
@@ -57,8 +58,6 @@ def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, 
                 label = label.to(device)
 
                 optimizer.zero_grad()
-
-                # gender = gender.float().view(cfg['batch_size'], 1)
 
                 pred = model(images)
                 loss = criterion(pred, label)
@@ -167,8 +166,8 @@ def train_model_ft(model, dataloaders, criterion, optimizer, scheduler, num_epoc
                     running_loss += loss.item() * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
 
-                epoch_loss = running_loss / (dataset_sizes[phase] * cfg['batch_size'])
-                epoch_acc = running_corrects.double() / (dataset_sizes[phase] * cfg['batch_size'])
+                epoch_loss = running_loss / (dataset_sizes[phase] * batch_size)
+                epoch_acc = running_corrects.double() / (dataset_sizes[phase] * batch_size)
 
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                     phase, epoch_loss, epoch_acc))
