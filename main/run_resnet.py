@@ -20,7 +20,7 @@ from config.cfg import cfg
 
 dataloaders = load_data('FGVC')
 dataset_sizes = {x: len(dataloaders[x]) for x in ['train', 'val', 'test']}
-batch_size = cfg['FGVC']['batch_size']
+batch_size = cfg['config']['FGVC']['batch_size']
 
 
 def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, scheduler, num_epochs,
