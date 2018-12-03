@@ -3,3 +3,4 @@
 util/baidu_ai_cfg.json
 main/model/
 main/test.jpg
+label.csv

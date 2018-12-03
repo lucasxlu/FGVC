@@ -1,12 +1,15 @@
 # Model Inference
+import time
 from pprint import pprint
 
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
+from skimage import io
 from torchvision import models
 
 
@@ -16,14 +19,14 @@ class PlantRecognizer():
     """
 
     def __init__(self, pretrained_model_path):
-        model = models.resnet18(pretrained=True)
+        model = models.resnet50(pretrained=True)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 998)
 
         model = model.float()
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        model = model.to(device)
 
-        model = nn.DataParallel(model)
         model.load_state_dict(torch.load(pretrained_model_path))
 
         # if torch.cuda.device_count() > 1:
@@ -45,7 +48,7 @@ class PlantRecognizer():
         df = pd.read_csv('../label.csv')
         key_type = {}
         for i in range(len(df['category_name'].tolist())):
-            key_type[int(df['category_name'].tolist()[i].split('_')[-1])] = df['label'].tolist()[i]
+            key_type[int(df['category_name'].tolist()[i].split('_')[-1]) - 1] = df['label'].tolist()[i]
 
         self.device = device
         self.model = model
@@ -53,7 +56,9 @@ class PlantRecognizer():
         self.topK = 5
 
     def infer(self, img_file):
-        img = Image.open(img_file)
+        tik = time.time()
+        img = io.imread(img_file)
+        img = Image.fromarray(img.astype(np.uint8))
 
         preprocess = transforms.Compose([
             transforms.Resize(227),
@@ -67,7 +72,7 @@ class PlantRecognizer():
 
         img = img.to(self.device)
 
-        outputs = self.model(img)
+        outputs = self.model.forward(img)
         outputs = F.softmax(outputs, dim=1)
 
         # get TOP-K output labels and corresponding probabilities
@@ -76,9 +81,12 @@ class PlantRecognizer():
 
         _, predicted = torch.max(outputs.data, 1)
 
+        tok = time.time()
+
         return {
             'status': 0,
             'message': 'success',
+            'elapse': tok - tik,
             'results': [
                 {
                     'name': self.key_type[int(topK_label[0][i].to("cpu"))],
@@ -90,5 +98,5 @@ class PlantRecognizer():
 
 
 if __name__ == '__main__':
-    plant_recognizer = PlantRecognizer('./model/ResNet18_Plant.pth')
-    pprint(plant_recognizer.infer('./xrk.jpg'))
+    plant_recognizer = PlantRecognizer('./model/ResNet50_Plant.pth')
+    pprint(plant_recognizer.infer('./3.jpg'))
