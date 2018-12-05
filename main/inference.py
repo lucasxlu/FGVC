@@ -90,7 +90,7 @@ class PlantRecognizer():
             'results': [
                 {
                     'name': self.key_type[int(topK_label[0][i].to("cpu"))],
-                    'category id': int(topK_label[0][i].data.to("cpu").numpy()),
+                    'category id': int(topK_label[0][i].data.to("cpu").numpy()) + 1,
                     'prob': round(prob[0][i], 4)
                 } for i in range(self.topK)
             ]
@@ -99,4 +99,7 @@ class PlantRecognizer():
 
 if __name__ == '__main__':
     plant_recognizer = PlantRecognizer('./model/ResNet50_Plant.pth')
-    pprint(plant_recognizer.infer('./3.jpg'))
+
+    for i in range(4):
+        pprint(plant_recognizer.infer('./{0}.jpg'.format(i + 1)))
+        print('=' * 100)

@@ -5,6 +5,8 @@ to one category, and take the majority voting strategy to decide the final annot
 import os
 import json
 import sys
+import numpy as np
+import pandas as pd
 
 
 def get_access_token():
@@ -53,10 +55,34 @@ def rec_with_baidu_ai(img_file, access_token):
         return result['result']
 
 
+def find_duplicate_label(csv_file):
+    """
+    find duplicate labels
+    :param csv_file:
+    :return:
+    """
+    df = pd.read_csv(csv_file)
+    ids = df['category_name']
+    lbs = df['label']
+
+    visited = []
+    duplicate = []
+
+    for i in range(len(lbs)):
+        if lbs[i] not in visited:
+            visited.append(lbs[i])
+        else:
+            duplicate.append([ids[i], lbs[i]])
+
+    print(duplicate)
+
+
 if __name__ == '__main__':
     access_token = get_access_token()
 
-    img_dir = "G:\Dataset\CV\FGCV5/train\category_998"
+    img_dir = "G:\Dataset\CV\FGCV5/train\category_376"
     # img_dir = "C:\DataSet\FGVC/train\category_909"
     for _ in os.listdir(img_dir):
         print(rec_with_baidu_ai(os.path.join(img_dir, _), access_token))
+
+    # find_duplicate_label('../label.csv')

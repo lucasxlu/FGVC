@@ -35,7 +35,7 @@ data_transforms = {
 
 def load_plants_disease_dataset():
     """
-    load license type dataset
+    load plants disease dataset
     :return:
     """
     batch_size = cfg['batch_size']
