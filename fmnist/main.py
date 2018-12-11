@@ -17,7 +17,6 @@ from sklearn.metrics import confusion_matrix
 from torch.optim import lr_scheduler
 from torchvision import models
 
-
 sys.path.append('../')
 from fmnist import data_loader
 from fmnist.utils import mkdirs_if_not_exist
@@ -75,7 +74,7 @@ def train_model_with_ft(model, dataloaders, criterion, optimizer, scheduler, num
                 # for inputs, labels, filenames in dataloaders[phase]:
                 for i, data in enumerate(dataloaders[phase], 0):
 
-                    inputs, labels = data['image'], data['label']
+                    inputs, labels = data[0], data[1]
                     inputs = inputs.to(device)
                     labels = labels.to(device)
 
@@ -110,10 +109,9 @@ def train_model_with_ft(model, dataloaders, criterion, optimizer, scheduler, num
                     tmp_total = 0
                     tmp_y_pred = []
                     tmp_y_true = []
-                    tmp_filenames = []
 
                     for data in dataloaders['val']:
-                        images, labels, filename = data['image'], data['label'], data['filename']
+                        images, labels = data[0], data[1]
                         images = images.to(device)
                         labels = labels.to(device)
 
@@ -124,7 +122,6 @@ def train_model_with_ft(model, dataloaders, criterion, optimizer, scheduler, num
 
                         tmp_y_pred += predicted.to("cpu").detach().numpy().tolist()
                         tmp_y_true += labels.to("cpu").detach().numpy().tolist()
-                        tmp_filenames += filename
 
                     tmp_acc = tmp_correct / tmp_total
 
@@ -176,12 +173,11 @@ def train_model_with_ft(model, dataloaders, criterion, optimizer, scheduler, num
     total = 0
     y_pred = []
     y_true = []
-    filenames = []
     probs = []
 
     with torch.no_grad():
         for data in dataloaders['test']:
-            images, labels, filename = data['image'], data['label'], data['filename']
+            images, labels = data[0], data[1]
             images = images.to(device)
             labels = labels.to(device)
 
@@ -198,7 +194,6 @@ def train_model_with_ft(model, dataloaders, criterion, optimizer, scheduler, num
 
             y_pred += predicted.to("cpu").detach().numpy().tolist()
             y_true += labels.to("cpu").detach().numpy().tolist()
-            filenames += filename
 
     print('Accuracy of {0} on test set: {1}% '.format(model.__class__.__name__, 100 * correct / total))
     print(
@@ -226,16 +221,16 @@ def train_model_with_ft(model, dataloaders, criterion, optimizer, scheduler, num
         "Recall of {0} on val set = {1}".format(model.__class__.__name__, sum(recalls) / len(recalls)))
 
     print('Output CSV...')
-    col = ['filename', 'gt', 'pred', 'prob']
-    df = pd.DataFrame([[filenames[i], y_true[i], y_pred[i], probs[i][0]] for i in range(len(filenames))],
+    col = ['gt', 'pred', 'prob']
+    df = pd.DataFrame([[y_true[i], y_pred[i], probs[i][0]] for i in range(len(y_true))],
                       columns=col)
     df.to_csv("./output-%s.csv" % model.__class__.__name__, index=False)
     print('CSV has been generated...')
 
 
-def run_license_type_rec(model, epoch):
+def run_fashion_rec(model, epoch):
     """
-    recognize license type
+    recognize fashion mnist
     :param model:
     :param epoch:
     :return:
@@ -261,7 +256,8 @@ def run_license_type_rec(model, epoch):
 
 if __name__ == '__main__':
     resnet = models.resnet18(pretrained=True)
+    resnet.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
     num_ftrs = resnet.fc.in_features
     resnet.fc = nn.Linear(num_ftrs, 10)
 
-    run_license_type_rec(model=resnet, epoch=200)
+    run_fashion_rec(model=resnet, epoch=200)
