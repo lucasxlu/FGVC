@@ -34,10 +34,10 @@ def load_fashion_mnist_dataset():
     """
     batch_size = cfg['batch_size']
 
-    train_dataset = FashionMNIST(train=True, transform=data_transforms['train'], root=cfg['image_dir'])
+    train_dataset = FashionMNIST(train=True, transform=data_transforms['train'], root=cfg['image_dir'], download=True)
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
-    test_dataset = FashionMNIST(train=False, transform=data_transforms['test'], root=cfg['image_dir'])
+    test_dataset = FashionMNIST(train=False, transform=data_transforms['test'], root=cfg['image_dir'], download=True)
     testloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return trainloader, testloader

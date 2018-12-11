@@ -17,9 +17,9 @@ from sklearn.metrics import confusion_matrix
 from torch.optim import lr_scheduler
 from torchvision import models
 
-from fmnist import data_loader
 
 sys.path.append('../')
+from fmnist import data_loader
 from fmnist.utils import mkdirs_if_not_exist
 from fmnist.cfg import cfg
 
