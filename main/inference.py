@@ -159,7 +159,7 @@ if __name__ == '__main__':
     plant_recognizer = PlantRecognizer('./model/ResNet50_Plant.pth')
     # pprint(plant_recognizer.infer('./{0}.jpg'.format(5)))
     pprint(plant_recognizer.infer_from_img_url(
-        "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544099445996&di=2716838202341cfddf9d3c5d58a76eaf&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fblog%2F201502%2F28%2F20150228103438_NQG3u.thumb.700_0.jpeg"))
+        "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544967248&di=f378a35f9c1749a96eb8ca5c4a17c4e9&imgtype=jpg&er=1&src=http%3A%2F%2Fimgsrc.baidu.com%2Fimgad%2Fpic%2Fitem%2F8718367adab44aed9d3ad930b91c8701a08bfbea.jpg"))
 
     # for i in range(4):
     #     pprint(plant_recognizer.infer('./{0}.jpg'.format(i + 1)))
