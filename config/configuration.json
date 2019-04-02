@@ -6,6 +6,13 @@
       "batch_size": 64,
       "init_lr": 1e-2,
       "decay_step": 100
+    },
+    "iFood": {
+      "root": "",
+      "epoch": 200,
+      "batch_size": 64,
+      "init_lr": 1e-2,
+      "decay_step": 50
     }
   }
 }
