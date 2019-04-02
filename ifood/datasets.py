@@ -35,7 +35,7 @@ class iFoodDataset(Dataset):
             with open(train_csv, mode='rt', encoding='utf-8') as f:
                 for _ in f.readlines():
                     imgs.append(os.path.join(cfg['image_dir'], 'train_set', _.split(",")[0]))
-                    lbs.append(int(_.split(",")[0].strip()))
+                    lbs.append(int(_.split(",")[1].strip()))
 
             self.img_files = imgs
             self.labels = lbs
@@ -43,7 +43,7 @@ class iFoodDataset(Dataset):
             with open(val_csv, mode='rt', encoding='utf-8') as f:
                 for _ in f.readlines():
                     imgs.append(os.path.join(cfg['image_dir'], 'val_set', _.split(",")[0]))
-                    lbs.append(int(_.split(",")[0].strip()))
+                    lbs.append(int(_.split(",")[1].strip()))
 
             self.img_files = imgs
             self.labels = lbs

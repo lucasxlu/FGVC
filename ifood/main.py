@@ -70,7 +70,6 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler, inference=F
                 running_corrects = 0
 
                 # Iterate over data.
-                # for inputs, labels, filenames in dataloaders[phase]:
                 for i, data in enumerate(dataloaders[phase], 0):
 
                     inputs, labels = data['image'], data['label']
@@ -238,18 +237,12 @@ def main(model):
     """
     criterion = nn.CrossEntropyLoss()
 
-    optimizer_ft = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4)
+    optimizer_ft = optim.SGD(model.parameters(), lr=cfg['init_lr'], momentum=0.9, weight_decay=cfg['weight_decay'])
 
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=50, gamma=0.1)
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=cfg['decay_step'], gamma=0.1)
 
     print('start loading iFoodDataset...')
-    trainloader, valloader = data_loader.load_ifood_dataset()
-
-    dataloaders = {
-        'train': trainloader,
-        'val': valloader,
-        'test': valloader,
-    }
+    dataloaders = data_loader.load_ifood_dataset()
 
     train_model(model=model, dataloaders=dataloaders, criterion=criterion, optimizer=optimizer_ft,
                 scheduler=exp_lr_scheduler, inference=False)
@@ -304,8 +297,8 @@ def batch_inference(model, inferencedataloader):
 
 if __name__ == '__main__':
     densenet161 = models.densenet161(pretrained=True)
-    num_ftrs = densenet161.fc.in_features
-    densenet161.fc = nn.Linear(num_ftrs, 211)
+    num_ftrs = densenet161.classifier.in_features
+    densenet161.classifier = nn.Linear(num_ftrs, 251)
 
     main(model=densenet161)
 
