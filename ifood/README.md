@@ -13,7 +13,11 @@ then split by ```disease type```, and finally by ```disease extent```.
 
     
 ## Performance
-| Model | Epoch | Accuracy |
-| :---: | :---: | :---: | 
-| SEResNet |  |  |
-| DenseNet + A-Softmax |  |  |
+| Model | Epoch | Accuracy | Precision | Recall |
+| :---: | :---: | :---: |:---: | :---: |  
+| SEResNet | 109 | 0.6689 | 0.6629 | 0.6564 |
+| DenseNet + A-Softmax |  |  |  |
+
+
+## Pretrained Model
+* [DenseNet161](https://drive.google.com/file/d/1_Wm7dsajpBDbf7JFBFxtbK-q0wJgCV-T/view?usp=sharing)
